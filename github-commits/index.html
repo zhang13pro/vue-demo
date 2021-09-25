@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Github Commits</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="demo">
+      <h1>Latest Blog Commits</h1>
+      <template v-for="branch in branches">
+        <input
+          type="radio"
+          :id="branch"
+          name="branch"
+          :value="branch"
+          v-model="currentBranch"
+        />
+        <label :for="branch">{{branch}}</label>
+      </template>
+      <p>zhang13pro/Litten-Blog@{{currentBranch}}</p>
+      <ul>
+        <li v-for="record in commits">
+          <a :href="record.html_url" target="_blank" class="commit"
+            >{{record.sha.slice(0,7)}}</a
+          >
+          - <span class="message">{{record.commit.message | truncate}}</span>
+          <br />
+          by
+          <span class="author">
+            <a :href="record.author.html_url" target="_blank"
+              >{{record.author.login}}</a
+            >
+          </span>
+          at
+          <span class="date">{{record.commit.author.date | formatDate}}</span>
+        </li>
+      </ul>
+    </div>
+
+    <script>
+      const apiURL =
+        "https://api.github.com/repos/zhang13pro/Litten-Blog/commits?sha=";
+
+      const demo = new Vue({
+        el: "#demo",
+        data: {
+          branches: ["main", "dev"],
+          currentBranch: "main",
+          commits: null,
+        },
+
+        created() {
+          this.fetchData();
+        },
+
+        filters: {
+          truncate(v) {
+            const newLine = v.indexOf("\n");
+            return newLine > 0 ? v.slice(0, newLine) : v;
+          },
+          formatDate(v) {
+            return v.replace(/T|Z/g, " ");
+          },
+        },
+
+        watch: {
+          currentBranch: "fetchData",
+        },
+
+        methods: {
+          fetchData() {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", apiURL + this.currentBranch);
+            xhr.onload = () => {
+              console.log(xhr.responseText);
+              this.commits = JSON.parse(xhr.responseText);
+              console.log(this.commits[0].html_url);
+            };
+            xhr.send();
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
