@@ -79,7 +79,7 @@
             let sortKey = this.sortKey; // name or power
             let filterKey = this.filterKey; // searchQuery
             let order = this.sortOrders[sortKey]; // 1 or -1
-            const heroes = this.heroes;
+            let heroes = this.heroes;
 
             if (filterKey) {
               heroes = heroes.filter((row) =>
