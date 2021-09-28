@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="style.css" />
+    <title>SVG Graph</title>
+
+    <script type="text/x-template" id="polygraph-template">
+      <g>
+        <polygon :points="points"></polygon>
+        <circle cx="200" cy="200" r="80"></circle>
+        <axis-label
+            v-for="(stat,index) in stats"
+            :stat="stat"
+            :index="index"
+            :total="stats.length">
+        </axis-label>
+      </g>
+    </script>
+  </head>
+  <body>
+    <div id="demo">
+      <p>{{getNum}}边形战士</p>
+      <svg width="400" height="400">
+        <polygraph :stats="stats"></polygraph>
+      </svg>
+      <!-- controls -->
+      <div v-for="stat in stats">
+        <label>{{stat.label}}</label>
+        <input type="range" v-model="stat.value" min="0" max="100" />
+        <span>{{stat.value}}</span>
+        <button @click="remove(stat)" class="remove">X</button>
+      </div>
+      <form id="add">
+        <input v-model="newLabel" />
+        <button @click="add">And One</button>
+      </form>
+      <pre id="raw">{{stats}}</pre>
+    </div>
+
+    <script>
+      // raw data
+      const stats = [
+        { label: "JavaScript", value: 100 },
+        { label: "Node", value: 100 },
+        { label: "Vue", value: 100 },
+        { label: "React", value: 100 },
+        { label: "Rust", value: 100 },
+        { label: "Go", value: 100 },
+      ];
+
+      Vue.component("polygraph", {
+        template: "#polygraph-template",
+        props: ["stats"],
+        computed: {
+          points() {
+            let total = this.stats.length;
+            return this.stats
+              .map((stat, i) => {
+                let point = valueToPoint(stat.value, i, total);
+                return point.x + "," + point.y;
+              })
+              .join(" ");
+          },
+        },
+        components: {
+          "axis-label": {
+            props: {
+              stat: Object,
+              index: Number,
+              total: Number,
+            },
+            template: `<text :x="point.x" :y="point.y">{{stat.label}}</text>`,
+            computed: {
+              point() {
+                return valueToPoint(
+                  // TODO use "+"
+                  +this.stat.value + 10,
+                  this.index,
+                  this.total
+                );
+              },
+            },
+          },
+        },
+      });
+
+      // TODO 求坐标点
+      function valueToPoint(value, index, total) {
+        let x = 0,
+          y = -value * 0.8,
+          angle = ((Math.PI * 2) / total) * index,
+          cos = Math.cos(angle),
+          sin = Math.sin(angle),
+          tx = 200 + x * cos - y * sin,
+          ty = 200 + x * sin + y * cos;
+
+        return {
+          x: tx,
+          y: ty,
+        };
+      }
+
+      new Vue({
+        el: "#demo",
+        data: {
+          stats: stats,
+          newLabel: "",
+        },
+        methods: {
+          add(e) {
+            e.preventDefault();
+            if (!this.newLabel) return;
+            this.stats.push({
+              label: this.newLabel,
+              value: 100,
+            });
+            this.newLabel = "";
+          },
+          remove(stat) {
+            if (this.stats.length > 3) {
+              this.stats.splice(this.stats.indexOf(stat), 1);
+            } else {
+              alert("Can't delete more");
+            }
+          },
+        },
+        computed: {
+          getNum() {
+            return this.stats.length;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
