@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tree View</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+
+    <!-- item template -->
+    <script type="text/x-template" id="item-template">
+      <li>My Tree [+]</li>
+    </script>
+  </head>
+  <body>
+    <p>(You can double click on an item to turn it into a folder.)</p>
+    <ul id="demo">
+      <tree-item
+        class="item"
+        :item="treeData"
+        @mark-folder="makeFolder"
+      ></tree-item>
+    </ul>
+
+    <script>
+      // demo data
+      const treeData = {
+        name: "My Tree",
+        children: [
+          { name: "hello" },
+          { name: "wat" },
+          {
+            name: "child folder",
+            children: [
+              {
+                name: "child folder",
+                children: [{ name: "hello" }, { name: "wat" }],
+              },
+              { name: "hello" },
+              { name: "wat" },
+              {
+                name: "child folder",
+                children: [{ name: "hello" }, { name: "wat" }],
+              },
+            ],
+          },
+        ],
+      };
+
+      Vue.component("tree-item", {
+        template: "#item-template",
+        props: {
+          item: Object,
+        },
+        data() {
+          return {
+            isOpen: false,
+          };
+        },
+        computed: {
+          isFolder() {
+            return this.item.children && this.item.children.length;
+          },
+        },
+        methods: {
+          makeFolder() {
+            if (!isFolder) {
+              this.isOpen = true;
+              this.$emit("make-folder", this.item);
+            }
+          },
+        },
+      });
+
+      new Vue({
+        el: "#demo",
+        data: {
+          treeData: treeData,
+        },
+      });
+    </script>
+  </body>
+</html>
