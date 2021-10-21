@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+      .done {
+        color: gray;
+        text-decoration: line-through;
+      }
+    </style>
+    <title>Todo-Vue3</title>
+  </head>
+  <body>
+    <div id="app">
+      <h2>{{title}}</h2>
+      <input type="text" v-model="title" @keydown.enter="addTodo" />
+      <button v-if="active<all" @click="clear">清除</button>
+      <ol>
+        <li v-for="todo in todos">
+          <input type="checkbox" v-model="todo.done" />
+          <span :class="{done:todo.done}">{{todo.title}}</span>
+        </li>
+      </ol>
+      <div v-if="todos.length">
+          全选 <input type="checkbox" v-model="allDone" />
+          <span> 完成度 {{active}}/{{all}}</span>
+        </div>
+      </div>
+    </div>
+    <script>
+      const App = {
+        data() {
+          return {
+            title: "",
+            todos: [
+              {
+                title: "敲代码",
+                done: false,
+              },
+            ],
+          };
+        },
+        methods: {
+          addTodo() {
+            if (this.title) {
+              this.todos.push({ title: this.title, done: false });
+              this.title = "";
+            }
+          },
+          clear(){
+            this.todos = this.todos.filter(v=>!v.done)
+          }
+        },
+        computed: {
+          active() {
+            return this.todos.filter((v) => !v.done).length;
+          },
+          all() {
+            return this.todos.length;
+          },
+          allDone:{
+            get(){
+              return this.active === 0
+            },
+            set(val){
+              this.todos.forEach((todo) =>todo.done=val)
+            }
+          }
+        },
+      };
+
+      Vue.createApp(App).mount("#app");
+    </script>
+  </body>
+</html>
